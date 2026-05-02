@@ -255,44 +255,56 @@ class Game{
     player2 = nullptr;
     currentPlayer = nullptr;
     isComputerTurn = false;
-    gameOver = false;
 }
     void start() {
         showMenu();
-        while (!gameOver) {
+        bool running = true;
+
+        while (running) {
             board.display();
-            cout << currentPlayer->getName() << "'s turn (" << currentPlayer->getSymbol() << ")\n";
-            if (isComputerTurn)
-                handleAIMove((AIPlayer*)player2);
-            else
+
+            if (isComputerTurn) {
+                handleAIMove((AIPlayer*)currentPlayer);
+            }
+            else {
                 handleHumanMove(currentPlayer);
-            checkGameEnd();
-            if (!gameOver)
+            }
+
+            if (board.checkWin(currentPlayer->getSymbol()) || board.isFull()) {
+                displayResult();
+
+                cout << "Play again? (y/n): ";
+                char choice;
+                cin >> choice;
+                if (choice == 'y' || choice == 'Y') {
+                    reset();
+                }
+                else {
+                    running = false;
+                    cout << "Goodbye!" << endl;
+                }
+            }
+            else {
                 switchPlayer();
-        }
-        displayResult();
-        char again;
-        cout << "Play again? (y/n): ";
-        cin >> again;
-        if (again == 'y' || again == 'Y') {
-            reset();
-            start();
+            }
         }
     }
 
-    void showMenu(){
-         int choice;
-    cout << "===== Tic Tac Toe =====\n";
-    cout << "1. Player vs Player\n";
-    cout << "2. Player vs Computer\n";
-    cout << "Enter choice: ";
-    cin >> choice;
 
-    if (choice == 1)
-        setupPvP();
-    else
-        setupPvC();
+    void showMenu() {
+        int choice;
+        cout << "===== Tic Tac Toe =====\n";
+        cout << "1. Player vs Player\n";
+        cout << "2. Player vs Computer\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 1)
+            setupPvP();
+        else
+            setupPvC();
     }
+
 
     void setupPvP(){
         string name1, name2;
@@ -342,6 +354,7 @@ class Game{
         }
     }
 
+
     void handleHumanMove(Player* player) {
         int row, col;
         player->getMove(row, col);
@@ -352,23 +365,24 @@ class Game{
         board.makeMove(row, col, player->getSymbol());
     }
 
+ 
+
     void handleAIMove(AIPlayer* aiPlayer) {
         int row, col;
         cout << aiPlayer->getName() << " is thinking...\n";
         aiPlayer->getMove(row, col);
         board.makeMove(row, col, aiPlayer->getSymbol());
-        cout << aiPlayer->getName() << " played at (" << row + 1 << ", " << col + 1 << ")\n";
     }
 
     void checkGameEnd() {
         if (board.checkWin(player1->getSymbol())) {
-            gameOver = true;
+            cout << player1->getName() << " wins!" << endl;
         }
         else if (board.checkWin(player2->getSymbol())) {
-            gameOver = true;
+            cout << player2->getName() << " wins!" << endl;
         }
         else if (board.isFull()) {
-            gameOver = true;
+            cout << "It's a draw!" << endl;
         }
     }
 
@@ -386,7 +400,7 @@ class Game{
         board.reset();
         currentPlayer = player1;
         isComputerTurn = false;
-        gameOver = false;
+        cout << "\n--- Game Reset ---\n" << endl;
     }
 };
 
