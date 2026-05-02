@@ -18,20 +18,22 @@ class Board{
 
 
     void display() const {
-        cout << "\n  ";
-        for (int c = 0; c < size; c++)
-            cout << " " << c + 1;
+        cout << "\n    ";
+        for (int c = 0; c < size; c++) {
+            cout << c + 1;
+            if (c < size - 1) cout << "   ";
+        }
         cout << "\n";
 
         for (int r = 0; r < size; r++) {
-            cout << r + 1 << " ";
+            cout << r + 1 << "   ";
             for (int c = 0; c < size; c++) {
-                cout << " " << grid[r][c];
-                if (c < size - 1) cout << "|";
+                cout << grid[r][c];
+                if (c < size - 1) cout << " | ";
             }
             cout << "\n";
             if (r < size - 1) {
-                cout << "  ";
+                cout << "    ";
                 for (int c = 0; c < size; c++) {
                     cout << "---";
                     if (c < size - 1) cout << "+";
@@ -50,14 +52,14 @@ class Board{
     }
 
 
-    bool isValidMove(int row, int col) {
+    bool isValidMove(int row, int col) const {
         if (row < 0 || row >= size || col < 0 || col >= size)
             return false;
         return grid[row][col] == ' ';
     }
 
 
-    bool checkWin(char symbol) {
+    bool checkWin(char symbol) const {
         for (int i = 0; i < size; i++) {
             bool rowWin = true, colWin = true;
             for (int j = 0; j < size; j++) {
@@ -77,7 +79,7 @@ class Board{
     }
 
 
-    bool isFull() {
+    bool isFull() const {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
                 if (grid[r][c] == ' ') return false;
@@ -144,7 +146,7 @@ public:
 };
 
 class AIPlayer: public Player{
-    private:
+    public:
     enum Difficulty{EASY,HARD};
     Difficulty difficulty;
 
@@ -246,6 +248,7 @@ class Game{
     Player* player1;
     Player* player2;
     bool isComputerTurn;
+    bool isPvC;
 
 
     public:
@@ -255,6 +258,7 @@ class Game{
     player2 = nullptr;
     currentPlayer = nullptr;
     isComputerTurn = false;
+    isPvC = false;
 }
     void start() {
         showMenu();
@@ -320,6 +324,7 @@ class Game{
 
     currentPlayer = player1;
     isComputerTurn = false;
+    isPvC = false;
     }
 
     void setupPvC(){
@@ -341,12 +346,13 @@ class Game{
 
     currentPlayer = player1;
     isComputerTurn = false;
+    isPvC = true;
     }
 
     void switchPlayer() {
         if (currentPlayer == player1) {
             currentPlayer = player2;
-            isComputerTurn = true;
+            isComputerTurn = isPvC;
         }
         else {
             currentPlayer = player1;
@@ -357,10 +363,10 @@ class Game{
 
     void handleHumanMove(Player* player) {
         int row, col;
-        player->getMove(row, col);
+        player->getMove(row, col, board);
         while (!board.isValidMove(row, col)) {
             cout << "Invalid move, try again.\n";
-            player->getMove(row, col);
+            player->getMove(row, col, board);
         }
         board.makeMove(row, col, player->getSymbol());
     }
@@ -370,7 +376,7 @@ class Game{
     void handleAIMove(AIPlayer* aiPlayer) {
         int row, col;
         cout << aiPlayer->getName() << " is thinking...\n";
-        aiPlayer->getMove(row, col);
+        aiPlayer->getMove(row, col, board);
         board.makeMove(row, col, aiPlayer->getSymbol());
     }
 
