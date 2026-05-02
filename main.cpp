@@ -109,26 +109,24 @@ class Player{
     string name;
     char symbol;
     public:
-   Player(const string& name , char symbol ){
-    this->name = name;
-    this->symbol = symbol;
-}
+    Player(const string& name , char symbol ){
+        this->name = name;
+        this->symbol = symbol;
+    }
 
-string getName() const{
-    return name;
-}
-
-char getSymbol() const{
-    return symbol;
-}
-
-void setName(const string& name){
-    this->name = name;
-}
-
-void setSymbol(char symbol){
-    this->symbol = symbol;
-}
+    virtual void getMove( int& row , int& col, const Board& board) = 0;
+    string getName() const{
+        return name;
+    }
+    char getSymbol() const{
+        return symbol;
+    }
+    void setName(const string& name){
+        this->name = name;
+    }
+    void setSymbol(char symbol){
+        this->symbol = symbol;
+    }
 };
 
 class HumanPlayer : public Player {
@@ -136,7 +134,7 @@ public:
    HumanPlayer(const string& name, char symbol)
     : Player(name, symbol) {}
 
-   void getMove(int& row, int& col) override {
+   void getMove(int& row, int& col,const Board& board) override {
     cout << "Enter row and column (1-3): ";
     cin >> row >> col;
 
@@ -146,28 +144,96 @@ public:
 };
 
 class AIPlayer: public Player{
-    public:
+    private:
     enum Difficulty{EASY,HARD};
     Difficulty difficulty;
 
     public:
     AIPlayer(const string& name , char symbol , Difficulty difficulty ) : Player(name,symbol){
-        //To Do
+        this->difficulty = difficulty;
     }
-    void getMove(int& row , int& col) override{
-        //To Do
+    void getMove(int& row , int& col, const Board& board) override{
+        if(difficulty == EASY) getRandomMove(row,col,board);
+        else getBestMove(row,col,board);
     }
     void setDifficulty(Difficulty difficulty){
-        //To Do
+        this->difficulty = difficulty;
     }
-    void getRandomMove(int& row , int& col){
-        //To Do
+    void getRandomMove(int& row , int& col, const Board& board){
+        srand(time(0));
+        do{
+            row = rand() % board.getSize();
+            col = rand() % board.getSize();
+        }while(!board.isValidMove(row,col));
     }
-    void getBestMove(int& row , int& col){
-        //To Do
+    int minimax(Board tempBoard, bool isMaximizing){
+        char aiSymbol = getSymbol();
+        char oppSymbol = (aiSymbol == 'X') ? 'O' : 'X';
+
+        if(tempBoard.checkWin(aiSymbol)) return 10;
+        if(tempBoard.checkWin(oppSymbol)) return -10;
+        if(tempBoard.isFull()) return 0;
+
+        if(isMaximizing){
+            int bestScore = INT_MIN;
+            for(int i=0;i<tempBoard.getSize();i++){
+                for(int j=0;j<tempBoard.getSize();j++){
+                    if(tempBoard.isValidMove(i,j)){
+                        Board nextBoard = tempBoard;
+                        nextBoard.makeMove(i,j,aiSymbol);
+                        int score = minimax(nextBoard, false);
+                        if(score>bestScore){
+                            bestScore = score;
+                        }
+                    }
+                }
+            }
+            return bestScore;
+        }
+        else{
+            int bestScore = INT_MAX;
+            for(int i=0;i<tempBoard.getSize();i++){
+                for(int j=0;j<tempBoard.getSize();j++){
+                    if(tempBoard.isValidMove(i,j)){
+                        Board nextBoard = tempBoard;
+                        nextBoard.makeMove(i,j,oppSymbol);
+                        int score = minimax(nextBoard, true);
+                        if(score<bestScore){
+                            bestScore = score;
+                        }
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
+    void getBestMove(int& row , int& col, const Board& board){
+        char aiSymbol = getSymbol();
+        int bestScore = INT_MIN;
+        int bestRow = -1, bestCol = -1;
+        for(int i=0;i<board.getSize();i++){
+            for(int j=0;j<board.getSize();j++){
+                if(board.isValidMove(i,j)){
+                    Board temp = board;
+                    temp.makeMove(i,j,aiSymbol);
+                    int score = minimax(temp, false);
+                    if(score>bestScore){
+                        bestScore = score;
+                        bestRow = i;
+                        bestCol = j;
+                    }
+                }
+            }
+        }
+        row = bestRow;
+        col = bestCol;
     }
     int evaluateBoard(const Board& board) const{
-        //To Do
+        char aiSymbol = getSymbol();
+        char oppSymbol = (aiSymbol == 'X') ? 'O' : 'X';
+        if(board.checkWin(aiSymbol)) return 10;
+        if(board.checkWin(oppSymbol)) return -10;
+        return 0;
     }
 };
 
