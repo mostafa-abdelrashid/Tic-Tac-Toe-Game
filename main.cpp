@@ -376,7 +376,7 @@ class Game{
     void handleAIMove(AIPlayer* aiPlayer) {
         int row, col;
         cout << aiPlayer->getName() << " is thinking...\n";
-        aiPlayer->getMove(row, col);
+        aiPlayer->getMove(row, col,board);
         board.makeMove(row, col, aiPlayer->getSymbol());
     }
 
