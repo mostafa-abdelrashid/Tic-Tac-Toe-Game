@@ -109,33 +109,40 @@ class Player{
     string name;
     char symbol;
     public:
-    Player(const string& name , char symbol ){
-        //To Do
-    }
-    virtual void getMove(int& row , int& col) = 0;
-    string getName() const{
-        //To Do
-    }
-    char getSymbol() const{
-        //To Do
-    }
-    void setName(const string& name){
-        //To Do
-    }
-    void setSymbol(char symbol){
-        //To Do
-    }
+   Player(const string& name , char symbol ){
+    this->name = name;
+    this->symbol = symbol;
+}
+
+string getName() const{
+    return name;
+}
+
+char getSymbol() const{
+    return symbol;
+}
+
+void setName(const string& name){
+    this->name = name;
+}
+
+void setSymbol(char symbol){
+    this->symbol = symbol;
+}
 };
 
 class HumanPlayer : public Player {
 public:
-    HumanPlayer(const string& name, char symbol) : Player(name, symbol) {
-        //To Do
-    }
+   HumanPlayer(const string& name, char symbol)
+    : Player(name, symbol) {}
 
-    void getMove(int& row, int& col) override {
-        //To Do
-    }
+   void getMove(int& row, int& col) override {
+    cout << "Enter row and column (1-3): ";
+    cin >> row >> col;
+
+    row--; 
+    col--;
+}
 };
 
 class AIPlayer: public Player{
@@ -177,10 +184,13 @@ class Game{
 
     public:
 
-    Game() : board(3){
-        //To Do
-    }
-
+  Game() : board(3){
+    player1 = nullptr;
+    player2 = nullptr;
+    currentPlayer = nullptr;
+    isComputerTurn = false;
+    gameOver = false;
+}
     void start() {
         showMenu();
         while (!gameOver) {
@@ -205,15 +215,54 @@ class Game{
     }
 
     void showMenu(){
-        //To Do
+         int choice;
+    cout << "===== Tic Tac Toe =====\n";
+    cout << "1. Player vs Player\n";
+    cout << "2. Player vs Computer\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+
+    if (choice == 1)
+        setupPvP();
+    else
+        setupPvC();
     }
 
     void setupPvP(){
-        //To Do
+        string name1, name2;
+
+    cout << "Enter Player 1 name: ";
+    cin >> name1;
+
+    cout << "Enter Player 2 name: ";
+    cin >> name2;
+
+    player1 = new HumanPlayer(name1, 'X');
+    player2 = new HumanPlayer(name2, 'O');
+
+    currentPlayer = player1;
+    isComputerTurn = false;
     }
 
     void setupPvC(){
-        //To Do
+         string name;
+    int choice;
+
+    cout << "Enter your name: ";
+    cin >> name;
+
+    cout << "Choose difficulty:\n";
+    cout << "1. Easy\n2. Hard\n";
+    cin >> choice;
+
+    AIPlayer::Difficulty diff =
+        (choice == 1) ? AIPlayer::EASY : AIPlayer::HARD;
+
+    player1 = new HumanPlayer(name, 'X');
+    player2 = new AIPlayer("Computer", 'O', diff);
+
+    currentPlayer = player1;
+    isComputerTurn = false;
     }
 
     void switchPlayer() {
