@@ -363,10 +363,10 @@ class Game{
 
     void handleHumanMove(Player* player) {
         int row, col;
-        player->getMove(row, col, board);
+        player->getMove(row, col,board);
         while (!board.isValidMove(row, col)) {
             cout << "Invalid move, try again.\n";
-            player->getMove(row, col, board);
+            player->getMove(row, col,board);
         }
         board.makeMove(row, col, player->getSymbol());
     }
@@ -376,7 +376,7 @@ class Game{
     void handleAIMove(AIPlayer* aiPlayer) {
         int row, col;
         cout << aiPlayer->getName() << " is thinking...\n";
-        aiPlayer->getMove(row, col, board);
+        aiPlayer->getMove(row, col);
         board.makeMove(row, col, aiPlayer->getSymbol());
     }
 
